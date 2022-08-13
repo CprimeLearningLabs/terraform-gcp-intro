@@ -88,7 +88,7 @@ To connect to the virtual machine, you need its public IP.  You can get this in 
 
     ![Public IP - Terraform show](./images/tf-show-vm-ip.png "Public IP - Terraform show")
 
-2. Go to the AWS Console UI
+2. Go to the GCP Console UI
 
     a. In the Console search bar, type 'EC2'.  Select the EC2 auto-suggestion in the drop-down.  
 

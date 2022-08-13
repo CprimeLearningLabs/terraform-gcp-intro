@@ -23,8 +23,8 @@ locals {
 ```
 
 Use the locals to replace the literal values in various resources:
-* Replace the region attribute value in the aws provider block in "main.tf" with <code>local.region</code>
-* Replace the value of the Environment tag in the aws provider block in "main.tf" with <code>local.environment</code>
+* Replace the region attribute value in the GCP provider block in "main.tf" with <code>local.region</code>
+* Replace the value of the Environment tag in the GCP provider block in "main.tf" with <code>local.environment</code>
 * Replace the ami attribute value in the "aws_instance" resource in "bastion.tf" with <code>local.instance_ami</code>
 * Replace the name attribute value in the "aws_ssm_parameter" resource in "database.tf" with <code>"/database/${local.environment}/password"</code>
 
@@ -40,5 +40,5 @@ Run terraform plan:
 terraform plan
 ```
 
-Confirm that the plan does not come up with any changes to make to the actual infrastructure in AWS.
+Confirm that the plan does not come up with any changes to make to the actual infrastructure in GCP.
 ![Terraform plan results with locals declared](./images/tf-locals.png "Terraform plan results with locals declared")

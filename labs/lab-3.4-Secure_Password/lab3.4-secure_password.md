@@ -1,7 +1,7 @@
-# Secure Password
+GCP# Secure Password
 
 Lab Objective:
-- Create a random password and store it in AWS parameter store
+- Create a random password and store it in GCP parameter store
 - Update database resource to use secured password
 
 ## Preparation
@@ -22,7 +22,7 @@ resource "random_password" "dbpassword" {
 }
 ```
 
-Securely store the new password in AWS Parameter Store.
+Securely store the new password in GCP Parameter Store.
 ```
 resource "aws_ssm_parameter" "dbpassword" {
   name  = "/database/Lab/password"
@@ -70,11 +70,11 @@ terraform state show random_password.dbpassword
 
 :bangbang: NOTE: Using credentials stored in parameter store helps secure the database.  Applications that need to access the database should use provisioning logic to extract the password from the parameter store and inject it into the application.  The password should not be saved in files on an application server.
 
-### Viewing the Password in AWS Console
+### Viewing the Password in GCP Console
 
-For privileged users, the password can be revealed through the AWS console.  Let's take a look.
+For privileged users, the password can be revealed through the GCP console.  Let's take a look.
 
-1. In the AWS console search bar, type "systems manager". Click on the Systems Manager item in the drop-down.
+1. In the GCP console search bar, type "systems manager". Click on the Systems Manager item in the drop-down.
 
 2. On the Systems Manage dashboard page, click on the "Parameter Store" menu item in the left navigation panel.  This will show a list of your stored parameters.
 

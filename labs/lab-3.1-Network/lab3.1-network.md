@@ -1,15 +1,15 @@
 # Create a Network
 
 Lab Objective:
-- Create a simple network in AWS
+- Create a simple network in GCP
 
 ## Lab
 
-### Change to use AWS Provider
+### Change to use GCP Provider
 
 Open `main.tf` for edit and make the following changes:
 
-1. Add AWS as a required provider.  We continue to use AWS for storing backend state.  The terraform block in main.tf should look as follows:
+1. Add GCP as a required provider.  We continue to use GCP for storing backend state.  The terraform block in main.tf should look as follows:
 
 ```
 terraform {
@@ -28,11 +28,11 @@ terraform {
     key            = "terraform.labs.tfstate"
     dynamodb_table = "terraform-state-lock"
   }
-  required_version = "~> 0.15.0"
+  required_version = "> 1.0.0"
 }
 ```
 
-2. Add a provider block to configure the AWS provider.  The configuration specifies the AWS region into which we will create our infrastructure, as well as declares some common tags to associate to all created resources.
+2. Add a provider block to configure the GCP provider.  The configuration specifies the GCP region into which we will create our infrastructure, as well as declares some common tags to associate to all created resources.
 
 ```
 provider "aws" {
@@ -176,11 +176,11 @@ Run terraform apply to create all the new infrastructure. *Be sure to type 'yes'
 terraform apply
 ```
 
-### Viewing Results in the AWS Management Console
+### Viewing Results in the GCP Management Console
 
-Let's use the AWS Console to see what you just created.  Go to the browser in which you logged into the Console UI.
+Let's use the GCP Console to see what you just created.  Go to the browser in which you logged into the Console UI.
 
-In the search bar at the top of the AWS Console page, type "VPC".  Select the VPC service from the drop-down.
+In the search bar at the top of the GCP Console page, type "VPC".  Select the VPC service from the drop-down.
 
 ![AWS Console Service Search](./images/console-search-vpc.png "AWS Console Service Search")
 <br /><br />

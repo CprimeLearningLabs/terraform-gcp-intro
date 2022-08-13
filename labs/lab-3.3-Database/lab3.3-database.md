@@ -12,7 +12,7 @@ If you did not complete lab 3.2, you can simply copy the solution code from that
 
 ### Add a Data Source
 
-To provide security of data at rest in our infrastructure, we will be creating a database that is encrypted.  For this, we will need an encryption key.  Let's suppose that in our organization the management of keys is handled by a separate security group that has already created encryption keys in AWS KMS.
+To provide security of data at rest in our infrastructure, we will be creating a database that is encrypted.  For this, we will need an encryption key.  Let's suppose that in our organization the management of keys is handled by a separate security group that has already created encryption keys in GCP KMS.
 
 In order to read a key from KMS, we will need to use a data source in Terraform.
 
@@ -21,7 +21,7 @@ Create a new file `database.tf`.
 touch database.tf
 ```
 
-Open the file for edit and add a data source to read a specified key from AWS KMS.  The "key_id" provides the criteria by which to find the desired key.
+Open the file for edit and add a data source to read a specified key from GCP KMS.  The "key_id" provides the criteria by which to find the desired key.
 ```
 data "aws_kms_key" "lab" {
   key_id = "alias/tflabs-dbkey"
@@ -59,7 +59,7 @@ resource "aws_security_group" "lab-database" {
 }
 ```
 
-2. A database subnet group to specify the private subnets on which the database is to be created.  AWS requires at least two subnets in a subnet group.
+2. A database subnet group to specify the private subnets on which the database is to be created.  GCP requires at least two subnets in a subnet group.
 ```
 resource "aws_db_subnet_group" "lab-database" {
   name        = "terraform-labs-database"

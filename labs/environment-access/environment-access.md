@@ -1,18 +1,18 @@
 # Lab Environment Access
 
-The labs for this class will require that you have access to the AWS Management Console and access to a provisioned lab workstation.
+The labs for this class will require that you have access to the GCP Management Console and access to a provisioned lab workstation.
 
-## AWS Management Console
+## GCP Management Console
 
-The infrastructure created using Terraform in this class' labs will be created in an AWS account dedicated for your use.  Your instructor will provide the AWS account number and login credentials for you to access the AWS Management Console for the account.
+The infrastructure created using Terraform in this class' labs will be created in an GCP account dedicated for your use.  Your instructor will provide the GCP account number and login credentials for you to access the GCP Management Console for the account.
 
-In a browser, go to https://console.aws.amazon.com
+In a browser, go to https://console.google.com
 
 Enter the account number and login credentials.  From the console, you will have read access to view the infrastructure you subsequently provision in the labs using Terraform.
 
 ## Workstation Virtual Machine
 
-For the labs in this class you will using a virtual machine that has been provisioned for you in AWS.  You can choose between a Linux workstation or a Windows workstation.  Follow the instruction in the appropriate sub-section below.
+For the labs in this class you will using a virtual machine that has been provisioned for you in GCP.  You can choose between a Linux workstation or a Windows workstation.  Follow the instruction in the appropriate sub-section below.
 
 ### Linux Workstation for Labs
 

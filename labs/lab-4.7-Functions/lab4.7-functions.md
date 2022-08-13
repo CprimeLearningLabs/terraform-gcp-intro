@@ -29,7 +29,7 @@ variable "tags" {
 
 Open the file `main.tf`.
 
-Modify the tags argument in the aws provider block to merge the tags input variable and the existing tag map.  What function would you use?  Try your hand at writing the solution before checking the solution below.  You can use terraform validate to check the syntax correctness of your solution.
+Modify the tags argument in the GCP provider block to merge the tags input variable and the existing tag map.  What function would you use?  Try your hand at writing the solution before checking the solution below.  You can use terraform validate to check the syntax correctness of your solution.
 
 <details>
 
