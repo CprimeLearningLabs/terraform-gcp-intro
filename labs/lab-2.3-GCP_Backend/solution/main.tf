@@ -6,7 +6,7 @@ terraform {
     }
   }
   backend "gcs" {
-    bucket  = "tf-state-000000"
+    # bucket  = "cprimelearning-tflabs-NN"
     prefix  = "terraform/state"
   }
   required_version = "> 1.0.0"
