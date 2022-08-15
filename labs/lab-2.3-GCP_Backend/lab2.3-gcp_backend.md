@@ -31,11 +31,10 @@ We will be configuring a backend to store the terraform state in an Google Cloud
 Edit `main.tf` to add a backend for GCP.  Add the following as a sub-block in the terraform block.  *Make sure you are putting the new code inside the terraform block and not at the end of the file or another arbitrary location.*
 
 ```
-  backend "gcs" {
-    region         = "us-west-2"
-    key            = "terraform.labs.tfstate"
-    dynamodb_table = "terraform-state-lock"
-  }
+backend "gcs" {
+  # bucket  = "cprimelearning-tflabs-NN"
+  prefix  = "terraform/state"
+}
 ```
 
 Your resulting terraform block should look as follows:  

@@ -23,10 +23,9 @@ terraform {
       version = "~> 3.0"
     }
   }
-  backend "s3" {
-    region         = "us-west-2"
-    key            = "terraform.labs.tfstate"
-    dynamodb_table = "terraform-state-lock"
+  backend "gcs" {
+    # bucket  = "cprimelearning-tflabs-NN"
+    prefix  = "terraform/state"
   }
   required_version = "> 1.0.0"
 }
