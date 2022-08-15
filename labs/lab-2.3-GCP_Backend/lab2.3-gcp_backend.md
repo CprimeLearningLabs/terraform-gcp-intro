@@ -26,19 +26,19 @@ If you are running this lab from the virtual machine provisioned for you, permis
 
 ### Update Terraform configuration
 
-We will be configuring a backend to store the terraform state in an GCP Cloud Storage bucket.  The bucket was already set up prior to the class.  The backend state will be stored in a new object created in the bucket.
+We will be configuring a backend to store the terraform state in an Google Cloud Storage bucket.  The bucket was already set up prior to the class.  The backend state will be stored in a new object created in the bucket.
 
 Edit `main.tf` to add a backend for GCP.  Add the following as a sub-block in the terraform block.  *Make sure you are putting the new code inside the terraform block and not at the end of the file or another arbitrary location.*
 
 ```
-  backend "s3" {
+  backend "gcs" {
     region         = "us-west-2"
     key            = "terraform.labs.tfstate"
     dynamodb_table = "terraform-state-lock"
   }
 ```
 
-Your resulting terraform block should look as follows:
+Your resulting terraform block should look as follows:  
 ```
 terraform {
   required_providers {
@@ -47,10 +47,9 @@ terraform {
       version = "~> 2.3.0"
     }
   }
-  backend "s3" {
-    region         = "us-west-2"
-    key            = "terraform.labs.tfstate"
-    dynamodb_table = "terraform-state-lock"
+  backend "gcs" {
+    # bucket  = "cprimelearning-tflabs-NN"
+    prefix  = "terraform/state"
   }
   required_version = "> 1.0.0"
 }
