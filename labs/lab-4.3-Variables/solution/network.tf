@@ -1,3 +1,17 @@
+resource "google_compute_firewall" "lab" {
+  project       = "tf-project-000000"
+  name          = "lab"
+  network       = google_compute_network.lab.name
+  allow {
+    protocol    = "icmp"
+  }
+  allow {
+    protocol    = "tcp"
+    ports       = ["22", "80", "443", "8000-8999"]
+  }
+  source_ranges = ["0.0.0.0/24"]
+}
+
 resource "google_compute_network" "lab" {
   project                 = "tf-project-359515"
   name                    = "lab"

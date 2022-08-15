@@ -53,7 +53,25 @@ Either copy the contents of network.tf from the solution folder for the lab, or 
 
 We will be defining a number of new resources in this file.  Let's walk through them.
 
-1. A Google compute network for our lab.
+1. A firewall object for the network
+
+```
+resource "google_compute_firewall" "lab" {
+  project       = "tf-project-000000"
+  name          = "lab"
+  network       = google_compute_network.lab.name
+  allow {
+    protocol    = "icmp"
+  }
+  allow {
+    protocol    = "tcp"
+    ports       = ["22", "80", "443", "8000-8999"]
+  }
+  source_ranges = ["0.0.0.0/24"]
+}
+```
+
+2. A Google compute network for our lab.
 
 ```
 resource "google_compute_network" "lab" {
@@ -62,7 +80,7 @@ resource "google_compute_network" "lab" {
 }
 ```
 
-2. A Public Network  
+3. A Public Network  
 
 ```
 resource "google_compute_subnetwork" "lab-public" {
@@ -73,7 +91,7 @@ resource "google_compute_subnetwork" "lab-public" {
 }
 ```
 
-3. A private Network
+4. A private Network
 
 ```
 resource "google_compute_subnetwork" "lab-private" {
