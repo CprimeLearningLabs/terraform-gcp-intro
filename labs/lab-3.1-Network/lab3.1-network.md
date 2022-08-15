@@ -30,10 +30,11 @@ terraform {
 }
 ```
 
-2. Add a provider block to configure the GCP provider.  The configuration specifies the GCP region into which we will create our infrastructure, as well as declares some common tags to associate to all created resources.
+2. Add a provider block to configure the GCP provider.  The configuration specifies the GCP region into which we will create our infrastructure, as well as declares some common tags to associate to all created resources.  Replace "tf-project-000000" with your project name.
 
 ```
 provider "google" {
+  project     = "tf-project-000000"
   region      = "us-central1"
 }
 ```
@@ -57,7 +58,6 @@ We will be defining a number of new resources in this file.  Let's walk through 
 
 ```
 resource "google_compute_firewall" "lab" {
-  project       = "tf-project-000000"
   name          = "lab"
   network       = google_compute_network.lab.name
   allow {

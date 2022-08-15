@@ -20,6 +20,6 @@ provider "random" {
 }
 
 provider "google" {
-  # project     = "my-project-id"
+  project     = "tf-project-000000"
   region      = "us-central1"
 }
