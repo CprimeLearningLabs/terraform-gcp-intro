@@ -18,13 +18,12 @@ terraform {
       source  = "hashicorp/random"
       version = "~> 2.3.0"
     }
-    aws = {
-      source = "hashicorp/aws"
-      version = "~> 3.0"
+    google = {
+      source = "hashicorp/google"
+      version = "4.31.0"
     }
   }
   backend "gcs" {
-    # bucket  = "cprimelearning-tflabs-NN"
     prefix  = "terraform/state"
   }
   required_version = "> 1.0.0"
@@ -34,19 +33,14 @@ terraform {
 2. Add a provider block to configure the GCP provider.  The configuration specifies the GCP region into which we will create our infrastructure, as well as declares some common tags to associate to all created resources.
 
 ```
-provider "aws" {
-  region = "us-west-2"
-  default_tags {
-    tags = {
-      Name = "Terraform-Labs"
-      Environment = "Lab"
-    }
-  }
+provider "google" {
+  region      = "us-central1"
 }
 ```
 
 3. Delete the "random_number" resource from the file.  We no longer need that resource. (Keep the "random" provider since we will use it again later.)
 
+---
 
 ### Define Network Resources
 
@@ -59,100 +53,37 @@ Either copy the contents of network.tf from the solution folder for the lab, or 
 
 We will be defining a number of new resources in this file.  Let's walk through them.
 
-1. A Virtual Private Cloud (VPC) for our network.
+1. A Google compute network for our lab.
 
 ```
-resource "aws_vpc" "lab" {
-  cidr_block = "10.0.0.0/16"
+resource "google_compute_network" "lab" {
+  name = "lab"
+  auto_create_subnetworks = false
 }
 ```
 
-2. An internet gateway to enable traffic to and from the public internet.  
+2. A Public Network  
 
 ```
-resource "aws_internet_gateway" "lab" {
-  vpc_id = aws_vpc.lab.id
+resource "google_compute_subnetwork" "lab-public" {
+  name          = "lab-public"
+  ip_cidr_range = "10.0.0.0/24"
+  region        = "us-central1"
+  network       = google_compute_network.lab.id
 }
 ```
 
-3. Two public subnets.  Notice that the subnet CIDR blocks are within the VPC CIDR range.
+3. A private Network
 
 ```
-resource "aws_subnet" "lab-public-1" {
-  vpc_id                  = aws_vpc.lab.id
-  cidr_block              = "10.0.0.0/24"
-  availability_zone       = "us-west-2a"
-  map_public_ip_on_launch = true
-  tags = {
-    Name = "Terraform-Labs-Public-1"
-    SubnetTier = "Public"
-  }
-}
-
-resource "aws_subnet" "lab-public-2" {
-  vpc_id                  = aws_vpc.lab.id
-  cidr_block              = "10.0.1.0/24"
-  availability_zone       = "us-west-2b"
-  map_public_ip_on_launch = true
-  tags = {
-    Name = "Terraform-Labs-Public-2"
-    SubnetTier = "Public"
-  }
+resource "google_compute_subnetwork" "lab-private" {
+  name          = "lab-private"
+  ip_cidr_range = "10.0.1.0/24"
+  region        = "us-central1"
+  network       = google_compute_network.lab.id
 }
 ```
 
-3. A route table to direct outbound Internet traffic to the internet gateway.
-
-```
-resource "aws_route_table" "lab-public" {
-  vpc_id = aws_vpc.lab.id
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.lab.id
-  }
-  tags = {
-    Name = "Terraform-Labs-Public"
-  }
-}
-```
-
-4. An association of the route table to each of the public subnets.
-
-```
-resource "aws_route_table_association" "lab-public-1" {
-  subnet_id      = aws_subnet.lab-public-1.id
-  route_table_id = aws_route_table.lab-public.id
-}
-
-resource "aws_route_table_association" "lab-public-2" {
-  subnet_id      = aws_subnet.lab-public-2.id
-  route_table_id = aws_route_table.lab-public.id
-}
-```
-
-5. Two private subnets.
-
-```
-resource "aws_subnet" "lab-private-1" {
-  vpc_id            = aws_vpc.lab.id
-  cidr_block        = "10.0.16.0/24"
-  availability_zone = "us-west-2a"
-  tags = {
-    Name = "Terraform-Labs-Private-1"
-    SubnetTier = "Application"
-  }
-}
-
-resource "aws_subnet" "lab-private-2" {
-  vpc_id            = aws_vpc.lab.id
-  cidr_block        = "10.0.17.0/24"
-  availability_zone = "us-west-2b"
-  tags = {
-    Name = "Terraform-Labs-Private-2"
-    SubnetTier = "Application"
-  }
-}
-```
 
 Stop to think a minute about the infrastructure we have defined. Does it make sense?
 
@@ -179,21 +110,11 @@ terraform apply
 
 Let's use the GCP Console to see what you just created.  Go to the browser in which you logged into the Console UI.
 
-In the search bar at the top of the GCP Console page, type "VPC".  Select the VPC service from the drop-down.
+In the search bar at the top of the GCP Console page, type "subnetworks".  Select the "VPC Networks" service from the drop-down.
 
-![AWS Console Service Search](./images/console-search-vpc.png "AWS Console Service Search")
+![AWS Console Service Search](./images/console-search-vpc.png "GCP Console Service Search")
 <br /><br />
 
-On the VPC dashboard page, select the "Your VPCs" menu item in the left navigation panel.
-
-![VPC Dashboard](./images/vpc-dashboard.png "VPC Dashboard")
-<br /><br />
-
-You will see two VPCs listed.  One has the name "Terraform Labs".  This is the one you just created.  You can ignore the other VPC.
-
-![VPC List](./images/vpc-list.png "VPC List")
-<br /><br />
-
-Click on the "Subnets" menu item in the left navigation panel.  You will see a listing of the subnets that were created.  Note that the subnets with names beginning with "Terraform Labs" were created in the Terraform Labs VPC.  Confirm that the CIDR blocks of the subnets are as expected.
+On the VPC dashboard page, scroll down to find the new subnets.  You will see two subnets listed.  One has the name "lab-public" the other has the name "lab-private"
 
 ![Subnet List](./images/subnet-list.png "Subnet List")

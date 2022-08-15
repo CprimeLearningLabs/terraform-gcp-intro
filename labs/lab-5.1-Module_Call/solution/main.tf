@@ -4,9 +4,9 @@ terraform {
       source  = "hashicorp/random"
       version = "~> 2.3.0"
     }
-    aws = {
-      source = "hashicorp/aws"
-      version = "~> 3.0"
+    google = {
+      source = "hashicorp/google"
+      version = "4.31.0"
     }
   }
   backend "gcs" {
@@ -19,14 +19,9 @@ terraform {
 provider "random" {
 }
 
-provider "aws" {
-  region = local.region
-  default_tags {
-    tags = merge(var.tags,{
-      Name = "Terraform-Labs"
-      Environment = local.environment
-    })
-  }
+provider "google" {
+  # project     = "my-project-id"
+  region      = "us-central1"
 }
 
 locals {
