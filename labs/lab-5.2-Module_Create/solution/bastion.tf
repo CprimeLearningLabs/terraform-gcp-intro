@@ -1,53 +1,47 @@
-locals {
-  bastion_ingress = {
-    "SSH Access" = {
-      port     = 22
-      protocol = "tcp"
-      cidrs    = ["0.0.0.0/0"]
-    }
-    "VPN Access" = {
-      port     = 1194
-      protocol = "tcp"
-      cidrs    = ["10.1.8.0/24"]
-    }
+resource "google_compute_firewall" "ssh" {
+  name          = "allow-ssh"
+  allow {
+    ports       = ["22"]
+    protocol    = "tcp"
   }
+  direction     = "INGRESS"
+  network       = "default"
+  priority      = 1000
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["ssh"]
 }
 
-resource "aws_security_group" "lab-bastion" {
-  name    = "terraform-labs-bastion"
-  vpc_id  = aws_vpc.lab.id
-
-  dynamic "ingress" {
-    for_each = local.bastion_ingress
-    content {
-      description = ingress.key
-      from_port   = ingress.value.port
-      to_port     = ingress.value.port
-      protocol    = ingress.value.protocol
-      cidr_blocks = ingress.value.cidrs
-    }
+resource "google_compute_firewall" "vpn" {
+  name          = "allow-vpn"
+  allow {
+    ports       = ["1194"]
+    protocol    = "udp"
   }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "Terraform-Labs-Bastion"
-  }
+  direction     = "INGRESS"
+  network       = "lab"
+  priority      = 1000
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["vpn"]
 }
 
-resource "aws_instance" "lab-bastion" {
-  ami                    = local.instance_ami
-  instance_type          = "t2.micro"
-  subnet_id              = aws_subnet.lab-public-1.id
-  vpc_security_group_ids = [aws_security_group.lab-bastion.id]
-  key_name               = var.vm_keypair_name
-
-  tags = {
-    Name = "Terraform-Labs-Bastion"
+resource "google_compute_instance" "bastion" {
+  name             = "bastion"
+  machine_type     = "f1-micro"
+  zone             = "us-central1-a"
+  tags             = ["ssh", "vpn"]
+  metadata = {
+    enable-oslogin = "TRUE"
+  }
+  boot_disk {
+    initialize_params {
+      image        = "projects/rocky-linux-cloud/global/images/rocky-linux-8-v20220719"
+    }
+  }
+  network_interface {
+    network        = "lab"
+    subnetwork     = "lab-public"
+    access_config {
+      # Include this section to give the VM an external IP address
+    }
   }
 }

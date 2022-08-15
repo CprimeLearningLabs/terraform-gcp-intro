@@ -1,42 +1,47 @@
-resource "aws_security_group" "lab-bastion" {
-  name    = "terraform-labs-bastion"
-  vpc_id  = aws_vpc.lab.id
-
-  ingress {
-    description = "SSH Access"
-    from_port   = 22
-    to_port     = 22
+resource "google_compute_firewall" "ssh" {
+  name          = "allow-ssh"
+  allow {
+    ports       = ["22"]
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
   }
-  ingress {
-    description = "VPN Access"
-    from_port   = 1194
-    to_port     = 1194
-    protocol    = "tcp"
-    cidr_blocks = ["10.1.8.0/24"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "Terraform-Labs-Bastion"
-  }
+  direction     = "INGRESS"
+  network       = "default"
+  priority      = 1000
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["ssh"]
 }
 
-resource "aws_instance" "lab-bastion" {
-  ami                    = "ami-03d5c68bab01f3496" # ubuntu OS
-  instance_type          = "t2.micro"
-  subnet_id              = aws_subnet.lab-public-1.id
-  vpc_security_group_ids = [aws_security_group.lab-bastion.id]
-  key_name               = "tf-lab-key"
+resource "google_compute_firewall" "vpn" {
+  name          = "allow-vpn"
+  allow {
+    ports       = ["1194"]
+    protocol    = "udp"
+  }
+  direction     = "INGRESS"
+  network       = "lab"
+  priority      = 1000
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["vpn"]
+}
 
-  tags = {
-    Name = "Terraform-Labs-Bastion"
+resource "google_compute_instance" "bastion" {
+  name             = "bastion"
+  machine_type     = "f1-micro"
+  zone             = "us-central1-a"
+  tags             = ["ssh", "vpn"]
+  metadata = {
+    enable-oslogin = "TRUE"
+  }
+  boot_disk {
+    initialize_params {
+      image        = "projects/rocky-linux-cloud/global/images/rocky-linux-8-v20220719"
+    }
+  }
+  network_interface {
+    network        = "lab"
+    subnetwork     = "lab-public"
+    access_config {
+      # Include this section to give the VM an external IP address
+    }
   }
 }

@@ -18,44 +18,43 @@ Create a new file `bastion.tf`.
 
 Add two new resources to this file.
 
-1. A security group to enable SSH access to the bastion host.
+1. A firewall rule to enable SSH access to the bastion host.  It will be linked to the bastion host via the target tag: "ssh".
 ```
-resource "aws_security_group" "lab-bastion" {
-  name    = "terraform-labs-bastion"
-  vpc_id  = aws_vpc.lab.id
-
-  ingress {
-    description = "SSH Access"
-    from_port   = 22
-    to_port     = 22
+resource "google_compute_firewall" "ssh" {
+  name          = "allow-ssh"
+  allow {
+    ports       = ["22"]
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
   }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "Terraform-Labs-Bastion"
-  }
+  direction     = "INGRESS"
+  network       = "default"
+  priority      = 1000
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["ssh"]
 }
 ```
 
-2. A virtual machine. (The SSH key for accessing the VM already exists and will be provided to you by the instructor.)
+2. A virtual machine.
 ```
-resource "aws_instance" "lab-bastion" {
-  ami                    = "ami-03d5c68bab01f3496" # ubuntu OS
-  instance_type          = "t2.micro"
-  subnet_id              = aws_subnet.lab-public-1.id
-  vpc_security_group_ids = [aws_security_group.lab-bastion.id]
-  key_name               = "tf-lab-key"
-
-  tags = {
-    Name = "Terraform-Labs-Bastion"
+resource "google_compute_instance" "bastion" {
+  name             = "bastion"
+  machine_type     = "f1-micro"
+  zone             = "us-central1-a"
+  tags             = ["ssh"]
+  metadata = {
+    enable-oslogin = "TRUE"
+  }
+  boot_disk {
+    initialize_params {
+      image        = "projects/rocky-linux-cloud/global/images/rocky-linux-8-v20220719"
+    }
+  }
+  network_interface {
+    network        = "lab"
+    subnetwork     = "lab-public"
+    access_config {
+      # Include this section to give the VM an external IP address
+    }
   }
 }
 ```
@@ -82,55 +81,61 @@ Let's check that the infrastructure actually works by connecting to the new virt
 
 To connect to the virtual machine, you need its public IP.  You can get this in a couple ways:
 
-1. Run `terraform show`
+1. Run `gcloud compute ssh`
 
-    a. Scroll up in the output to find the state for the virtual machine resource "aws_instance.lab-bastion".  One of its attributes should be `public_ip`.
+    a. Run `gcloud compute ssh --zone "us-central1-a" "bastion"  --project "tf-project-000000"` replace "tf-project-000000" with your project name.
 
-    ![Public IP - Terraform show](./images/tf-show-vm-ip.png "Public IP - Terraform show")
+    b. Notice that this also generates a SSH key pair adding it to the running VM.
 
 2. Go to the GCP Console UI
 
-    a. In the Console search bar, type 'EC2'.  Select the EC2 auto-suggestion in the drop-down.  
+    a. In the Console search bar, type 'virtual machine'.  Select the VM instances in the drop-down.  
 
-    b. On the EC2 dashboard, click the "Instances" menu option.  This will show a list of the running virtual machines. In the list find the instance named "Terraform-Labs-Bastion". (The other instance is the workstation machine that you are using to run Terraform for the labs.)
+    b. On the VM instances dashboard, click the "SSH" option on the "bastion" row.  This will connect to the bastion host through a web interface.
 
-    c. Click on the "Instance ID" value in the list for the machine.  This will display a summary page for the instance on which you can find the field labeled "Public IPv4 address".
+3. Through SSH client of choice
 
-    ![Public IP - AWS console](./images/aws-vm-summary.png "Public IP - AWS portal")
+    a. Take note of the username from the options #1 and #2.  It should be your login name for GCP replacing special characters with "_".  Use this username in your SSH client.
+
+    b. The public IP address can be found by running `terraform show`. Scroll up in the output to find the state for the virtual machine resource "google_compute_instance.bastion".  One of its attributes under "network_interfaces" should be `nat_ip`. Use that as the publiIP to connect to.
+
+    c. The private key was generated earlier.  To use OpenSSH from a bash shell run 'ssh username@pubicIP' to connect.
+
+*You may be prompted to confirm that you want to connect. Enter "yes".*
 
 <br /><br />
 
-Once you find the public IP, you can SSH to the machine.  (If you are viewing the instance details in the console UI, clicking on the "open address" link next to the public IP will not work since there is no HTTP server on the instance.)
-
-In the terminal console of your lab workstation machine, use the ssh command, substituting in the correct public IP. (You do not need to specify the SSH key since the SSH key was already provisioned on your lab workstation machine as the default SSH key.)
-
-```
-ssh ubuntu@<public-ip>
-```
-*You may be prompted to confirm that you want to connect. Enter "yes".*
-
-Confirm you can ssh into the new bastion host machine.  You should see that the IP address in the terminal prompt has changed to the private IP of the new virtual machine.
+Confirm you can ssh into the new bastion host machine.  You should see that the terminal prompt has changed to the private IP of the new virtual machine.
 
 > You could also connect to the new bastion host from your personal machine, in which case you can use the same SSH key you used to connect to the workstation virtual machine.
-
-![SSH into VM](./images/cs-vm-ssh.png "SSH into VM")
 
 Exit the SSH session on the bastion host virtual machine.
 
 ### Making Changes to An Existing Resource
 
-Let's suppose your organization also wants to support accessing the bastion host via a VPN.  To enable this access, we will modify the security group to allow TCP traffic on port 1194.
+Let's suppose your organization also wants to support accessing the bastion host via a VPN.  To enable this access, we will modify the firewall rules to allow TCP traffic on port 1194.
 
 Add the following to the security group in the `bastion.tf` file.  To see where to add the code, go to the Terraform documentation page for "aws_security_group". (Or you can look at the code in the solution folder of this lab.)
 
 ```
-  ingress {
-    description = "VPN Access"
-    from_port   = 1194
-    to_port     = 1194
-    protocol    = "tcp"
-    cidr_blocks = ["10.1.8.0/24"]
+resource "google_compute_firewall" "vpn" {
+  name          = "allow-vpn"
+  allow {
+    ports       = ["1194"]
+    protocol    = "udp"
   }
+  direction     = "INGRESS"
+  network       = "lab"
+  priority      = 1000
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["vpn"]
+}
+```
+
+Also add the "vpn" tag to the bastion instances
+
+```
+  tags             = ["ssh", "vpn"]
 ```
 
 Save the file and run terraform plan:
@@ -140,10 +145,8 @@ terraform plan
 
 Notice that the plan shows an update to the security group.
 
-![Terraform Plan - Modified SG](./images/tf-plan-sg.png "Terraform Plan - Modified SG")
-
-
 Run terraform apply (remember to confirm yes to the changes):
+
 ```
 terraform apply
 ```
