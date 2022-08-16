@@ -55,7 +55,7 @@ terraform {
 
 This will now direct the state to be saved in GCP.  Since you changed the backend configuration, you will need to run terraform init again.
 
-A missing argument in the backend configuration above is the specification of the Cloud Storage bucket.  Terraform will therefore prompt you to enter the bucket name when you run terraform init.  The bucket name will be "cprimelearning-tflabs-NN" where NN is a student sequence number provided to you by the instructor.  For example, if your sequence number is "05", then the bucket name would be "cprimelearning-tflabs-05".
+A missing argument in the backend configuration above is the specification of the Cloud Storage bucket.  Terraform will therefore prompt you to enter the bucket name when you run terraform init.  The bucket name will be "tf-state-NN" where NN is a student sequence number generated when creating the project.  For example, if your sequence number is "123456", then the bucket name would be "tf-state-123456".
 
 Run:
 
