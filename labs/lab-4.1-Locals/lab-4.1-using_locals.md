@@ -16,17 +16,16 @@ Open the file `main.tf` for edit.
 Add a locals block at the bottom of the file:
 ```
 locals {
-  region       = "us-west-2"
-  environment  = "Lab"
-  instance_ami = "ami-03d5c68bab01f3496"
+  region         = "us-central1"
+  project        = "tf-project-000000"
+  instance_image = "projects/rocky-linux-cloud/global/images/rocky-linux-8-v20220719"
 }
 ```
 
 Use the locals to replace the literal values in various resources:
 * Replace the region attribute value in the GCP provider block in "main.tf" with <code>local.region</code>
-* Replace the value of the Environment tag in the GCP provider block in "main.tf" with <code>local.environment</code>
-* Replace the ami attribute value in the "aws_instance" resource in "bastion.tf" with <code>local.instance_ami</code>
-* Replace the name attribute value in the "aws_ssm_parameter" resource in "database.tf" with <code>"/database/${local.environment}/password"</code>
+* Replace the value of the project tag in the GCP provider block in "main.tf" with <code>local.project</code>
+* Replace the image attribute value in the "bastion" resource in "bastion.tf" with <code>local.instance_image</code>
 
 Compare your changes to the code in the solution folder.
 

@@ -1,3 +1,9 @@
+locals {
+  region         = "us-central1"
+  project        = "tf-project-000000"
+  instance_image = "projects/rocky-linux-cloud/global/images/rocky-linux-8-v20220719"
+}
+
 terraform {
   required_providers {
     random = {
@@ -20,19 +26,6 @@ provider "random" {
 }
 
 provider "google" {
-  project     = "tf-project-000000"
-  region      = "us-central1"
-}
-
-locals {
-  region = var.region
-  environment = "Lab"
-  instance_ami = "ami-03d5c68bab01f3496"  # ubuntu OS
-  size_spec = {
-    low = 1,
-    medium = 2,
-    high = 3
-  }
-  cluster_size = try(coalesce(var.node_count, lookup(local.size_spec,var.load_level)), 1)
-  archiving_enabled = false
+  project     = local.project
+  region      = local.region
 }

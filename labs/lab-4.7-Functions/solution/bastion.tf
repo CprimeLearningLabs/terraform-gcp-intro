@@ -34,7 +34,7 @@ resource "google_compute_instance" "bastion" {
   }
   boot_disk {
     initialize_params {
-      image        = "projects/rocky-linux-cloud/global/images/rocky-linux-8-v20220719"
+      image        = local.instance_image
     }
   }
   network_interface {
