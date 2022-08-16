@@ -1,5 +1,5 @@
 resource "google_sql_database_instance" "lab-database" {
-  name             = "lab-database-instance"
+  name             = var.db_name
   region           = "us-central1"
   database_version = "POSTGRES_14"
   settings {

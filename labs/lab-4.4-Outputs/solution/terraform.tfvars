@@ -1,2 +1,2 @@
-region = "us-west-2"
-vm_keypair_name = "tf-lab-key"
+region = "us-central1"
+bastion_vm_type = "f1-micro"

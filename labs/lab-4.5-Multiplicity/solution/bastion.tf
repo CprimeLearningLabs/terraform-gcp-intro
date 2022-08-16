@@ -26,7 +26,7 @@ resource "google_compute_firewall" "vpn" {
 
 resource "google_compute_instance" "bastion" {
   name             = "bastion"
-  machine_type     = "f1-micro"
+  machine_type     = var.bastion_vm_type
   zone             = "us-central1-a"
   tags             = ["ssh", "vpn"]
   metadata = {
