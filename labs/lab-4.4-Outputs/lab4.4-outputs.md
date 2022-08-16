@@ -29,11 +29,11 @@ Add outputs for the above two attributes to the file.  Try your hand at it first
 
 ```
 output "bastion-public-ip" {
-  value = aws_instance.lab-bastion.public_ip
+  value = google_compute_instance.bastion.network_interface[0].access_config[0].nat_ip
 }
 
 output "db-server-endpoint" {
-  value = aws_db_instance.lab-database.endpoint
+  value = google_sql_database_instance.lab-database.ip_address[0].ip_address
 }
 ```
 </details>
