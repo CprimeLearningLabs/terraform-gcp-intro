@@ -12,6 +12,17 @@ If you did not complete lab 3.3, you can simply copy the solution code from that
 
 Open the file `database.tf` for edit.
 
+Open the file for edit and add a data source to read a specified key from GCP KMS.  The "key_id" provides the criteria by which to find the desired key.
+```
+data "google_kms_key_ring" "lab" {
+  name     = "tflabs-dbkey"
+  location = "us-central1"
+}
+```
+
+*If you have not yet you will need to enable "Cloud Key Management (KMS) API access on your project"*
+
+
 Add a new resource to create a random password that satisfies the constraints for MySQL passwords.
 ```
 resource "random_password" "dbpassword" {

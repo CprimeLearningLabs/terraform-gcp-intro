@@ -22,77 +22,33 @@ touch database.tf
 ```
 
 Open the file for edit and add a data source to read a specified key from GCP KMS.  The "key_id" provides the criteria by which to find the desired key.
-```
-data "aws_kms_key" "lab" {
-  key_id = "alias/tflabs-dbkey"
-}
-```
+
 
 ### Define a Database
 
-Continue to edit the `database.tf` file.  We will be adding a few new resources to instantiate a MySQL database.
+*If you have not yet you will need to enable "Cloud SQL Admin API access on your project"*
 
-1. A security group to enable access to the database from the bastion host.
+Open the file for edit and add a resource for the PostgreSQL database.
+
+1. A PostgreSQL database.
 ```
-resource "aws_security_group" "lab-database" {
-  name    = "terraform-labs-database"
-  vpc_id  = aws_vpc.lab.id
-
-  ingress {
-    description = "DB Access"
-    from_port   = 3306
-    to_port     = 3306
-    protocol    = "tcp"
-    cidr_blocks = ["${aws_instance.lab-bastion.private_ip}/32"]
+resource "google_sql_database_instance" "lab-database" {
+  name             = "lab-database-instance"
+  region           = "us-central1"
+  database_version = "POSTGRES_14"
+  settings {
+    tier = "db-f1-micro"
   }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "Terraform-Labs-Database"
-  }
+  deletion_protection  = "false"
 }
 ```
 
-2. A database subnet group to specify the private subnets on which the database is to be created.  GCP requires at least two subnets in a subnet group.
+2. A database user
 ```
-resource "aws_db_subnet_group" "lab-database" {
-  name        = "terraform-labs-database"
-  subnet_ids  = [aws_subnet.lab-private-1.id, aws_subnet.lab-private-2.id]
-
-  tags = {
-    Name = "Terraform-Labs-Database"
-  }
-}
-```
-
-3. A MySQL database. Notice that the data source is referenced for the kms key.
-```
-resource "aws_db_instance" "lab-database" {
-  allocated_storage    = 10
-  engine               = "mysql"
-  engine_version       = "5.7"
-  instance_class       = "db.t3.micro"
-  storage_encrypted    = true
-  kms_key_id           = data.aws_kms_key.lab.arn
-  multi_az             = false
-  identifier           = "terraform-labs-database"
-  name                 = "appdb"
-  username             = "dbadmin"
-  password             = "Awstfl4b$"
-  skip_final_snapshot  = true
-
-  vpc_security_group_ids  = [aws_security_group.lab-database.id]
-  db_subnet_group_name    = aws_db_subnet_group.lab-database.id
-
-  tags = {
-    Name = "Terraform-Labs-Database"
-  }
+resource "google_sql_user" "lab-db" {
+  name     = "lab-db"
+  instance = google_sql_database_instance.lab-database.name
+  password = "Gcptfl4b$"
 }
 ```
 
