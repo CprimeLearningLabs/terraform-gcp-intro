@@ -32,7 +32,7 @@ At the “>” prompt, enter the following to see what they evaluate to.
 ```
 > local.environment == "Prod" ? "t3.large" : "t3.micro"
 
-> local.region == "us-west-2" ? "primary" : "secondary"
+> local.region == "us-central1" ? "primary" : "secondary"
 ```
 <details>
 
@@ -59,14 +59,13 @@ At the “>” prompt, enter the following to see what they evaluate to.
 _Extract the keys of the subnet tags:_
 
 ```
-> [for k,v in aws_subnet.lab-public-1.tags_all : k]
+> [for k,v in google_compute_subnetwork.lab-public : k]
 ```
 
 <details>
 
  _<summary>Click to see results of above</summary>_
 
-![Terraform console results](./images/tf-console-4.png "Terraform console results")
 </details>
 
 To exit the Terraform console, type:
