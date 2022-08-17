@@ -12,25 +12,25 @@ If you did not complete lab 4.4, you can simply copy the solution code from that
 
 ### Using for_each
 
-Create a new file `s3.tf`, and open it for edit.
+Create a new file `bucket.tf`, and open it for edit.
 
-We are going to create a few S3 buckets where the buckets differ not only by the bucket name but also by a couple of other properties.
+We are going to create a few cloud storage buckets where the buckets differ not only by the bucket name but also by a couple of other properties.
 
-The for_each operation requires a map to define the different values for each resource instance.  Add the following map to the `s3.tf` file to specify three buckets and two properties for each bucket.  Look closely at the code to see that it is a map of maps.  We will be iterating over the outer "application_buckets" map.
+The for_each operation requires a map to define the different values for each resource instance.  Add the following map to the `bucket.tf` file to specify three buckets and two properties for each bucket.  Look closely at the code to see that it is a map of maps.  We will be iterating over the outer "application_buckets" map.
 ```
 locals {
-  application_buckets = {
+  bucket_settings = {
     uploads = {
-      acl        = "private"
-      versioning = true
+      location = var.region
+      force_destroy = false
     },
     media = {
-      acl        = "private"
-      versioning = false
+      location = var.region
+      force_destroy = true
     },
     feeds = {
-      acl        = "public-read"
-      versioning = true
+      location = var.region
+      force_destroy = true
     }
   }
 }
@@ -38,15 +38,13 @@ locals {
 
 We can now add a resource declaration to create the S3 buckets.  Examine the code below to make sure you understand how it is using the map key and map values in the resource.
 ```
-resource "aws_s3_bucket" "lab-bucket" {
-  for_each = local.application_buckets
+resource "google_storage_bucket" "lab_bucket" {
+  for_each      = local.bucket_settings
 
-  bucket_prefix = "terraform-labs-${each.key}-"
-  acl           = each.value.acl
-
-  versioning {
-    enabled = each.value.versioning
-  }
+  name          = "${local.project}-${each.key}"
+  location      = each.value.location
+  storage_class = "REGIONAL"
+  force_destroy = each.value.force_destroy
 }
 ```
 
@@ -195,17 +193,21 @@ Open the file `main.tf` for edit.  In the locals block, add a local to control w
   archiving_enabled = false
 ```
 
-Open the file `s3.tf` again for edit.
+Open the file `bucket.tf` again for edit.
 
-Add a resource for another S3 bucket, but with a conditional expression for count.  Note that the count could evaluate to either 1 or 0 depending on the value of `local.archiving_enabled`.
+Add a resource for another cloud storage bucket, but with a conditional expression for count.  Note that the count could evaluate to either 1 or 0 depending on the value of `local.archiving_enabled`.
 ```
-resource "aws_s3_bucket" "archive" {
+resource "google_storage_bucket" "archive" {
   count = local.archiving_enabled ? 1 : 0
 
-  bucket_prefix = "terraform-labs-archives-"
-  acl           = "private"
+  name          = archive
+  location      = var.region
+  storage_class = "REGIONAL"
+  force_destroy = false
 }
 ```
+
+Add `archiving_enabled` to the locals section in `bucket.tf` a value of `0`
 
 Validate your new code.
 ```
@@ -216,3 +218,5 @@ Run terraform plan to see whether or not the additional bucket gets created.  Is
 ```
 terraform plan
 ```
+
+Change the value of `archiving_enabled` to `1` and see how it changes the `terraform plan`.
