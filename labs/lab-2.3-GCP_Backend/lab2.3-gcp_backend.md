@@ -47,9 +47,13 @@ terraform {
     }
   }
   backend "gcs" {
+    # bucket  = "cprimelearning-tflabs-NN"
     prefix  = "terraform/state"
   }
   required_version = "> 1.0.0"
+}
+
+provider "random" {
 }
 ```
 
