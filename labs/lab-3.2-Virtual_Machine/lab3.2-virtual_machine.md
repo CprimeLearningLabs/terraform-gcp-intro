@@ -56,6 +56,12 @@ resource "google_compute_instance" "bastion" {
       # Include this section to give the VM an external IP address
     }
   }
+  metadata_startup_script = <<SCRIPT
+fallocate -l 1G /swapfile
+chmod 0600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+SCRIPT
 }
 ```
 Save the file.

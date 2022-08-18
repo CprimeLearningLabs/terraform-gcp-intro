@@ -80,7 +80,7 @@ resource "google_compute_network" "lab" {
 }
 ```
 
-3. A Public Network  
+3. A public network  
 
 ```
 resource "google_compute_subnetwork" "lab-public" {
@@ -91,7 +91,7 @@ resource "google_compute_subnetwork" "lab-public" {
 }
 ```
 
-4. A private Network
+4. A private network
 
 ```
 resource "google_compute_subnetwork" "lab-private" {
@@ -102,6 +102,34 @@ resource "google_compute_subnetwork" "lab-private" {
 }
 ```
 
+5. A network router
+
+```
+resource "google_compute_router" "lab" {
+  name    = "lab-router"
+  region  = "us-central1"
+  network = google_compute_network.lab.id
+  bgp {
+    asn = 64514
+  }
+}
+```
+
+6. A NATing rule
+
+```
+resource "google_compute_router_nat" "lab" {
+  name                               = "lab-router-nat"
+  router                             = google_compute_router.lab.name
+  region                             = "us-central1"
+  nat_ip_allocate_option             = "AUTO_ONLY"
+  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+  log_config {
+    enable = true
+    filter = "ERRORS_ONLY"
+  }
+}
+```
 
 Stop to think a minute about the infrastructure we have defined. Does it make sense?
 
