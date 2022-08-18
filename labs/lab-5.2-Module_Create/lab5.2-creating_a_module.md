@@ -144,6 +144,8 @@ Run terraform apply:
 terraform apply
 ```
 
+In this run you may receive an error creating a resources because the resource already exists.  The reason that happens is because you are both deleting a named resource from the root module and recreating the same named resource is a module at the same time.  If the deleting resource does not finish deleting before the new resource is created you will recieve this error.  Just run "terraform apply" again after a few seconds.  This time the deleted resources should be already removed and you should notice only "adds" in the plan no "destroys".
+
 ## Lab Cleanup
 
 This is the final lab of the class.  When you are done with the lab and are satisfied with the results, please tear down everything you created by running terraform destroy:
