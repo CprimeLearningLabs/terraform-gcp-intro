@@ -59,7 +59,7 @@ Run terraform validate to make sure you have no errors:
 terraform validate
 ```
 
-Run terraform plan and verify that three new resources will be created.  The data source is read by Terraform during the plan generation in order to populate the ARN value for the "kms_key_id" attribute of the aws_db_instance resource.
+Run terraform plan and verify that the new resources will be created.
 ```
 terraform plan
 ```

@@ -50,7 +50,7 @@ Now, use a variable reference to replace the corresponding target expressions in
 
 - Set the region local value in "main.tf" with `var.region`
 - Set the bastion_vm_type value for machine_type in "bastion.tf" with `var.bastion_vm_type`
-- Set the name value for aws_db_instance in "database.tf" with `var.db_name`
+- Set the name value for google_sql_database_instance in "database.tf" with `var.db_name`
 
 Run terraform validate to check for errors.
 

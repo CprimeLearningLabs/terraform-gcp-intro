@@ -22,7 +22,7 @@ resource "random_password" "dbpassword" {
 }
 ```
 
-Now, update the database resource to use the new secure password instead of a hard-coded password.  In the existing "aws_db_instance" resource, change the "password" argument:
+Now, update the database resource to use the new secure password instead of a hard-coded password.  In the existing "google_sql_user" resource, change the "password" argument:
 ```
   password = random_password.dbpassword.result
 ```

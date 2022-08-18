@@ -44,7 +44,7 @@ At the “>” prompt, enter the following to see what they evaluate to.
 #### Splat Expression:
 
 ```
-> aws_security_group.lab-bastion.ingress[*].to_port
+> google_sql_database_instance.lab-database.ip_address[*].ip_address
 ```
 
 <details>

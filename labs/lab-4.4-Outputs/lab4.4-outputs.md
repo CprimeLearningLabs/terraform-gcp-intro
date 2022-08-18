@@ -20,8 +20,8 @@ For this lab, we will output two values:
 Create a file called `outputs.tf`.
 
 Add outputs for the above two attributes to the file.  Try your hand at it first before looking at the solution.  You might want to take a look at the Terraform documentation to see what attributes are exported for the two resources:
-- aws_instance
-- aws_db_instance
+- google_compute_instance
+- google_sql_database_instance
 
 <details>
 

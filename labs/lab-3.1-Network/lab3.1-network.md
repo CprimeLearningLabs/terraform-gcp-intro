@@ -158,7 +158,7 @@ Let's use the GCP Console to see what you just created.  Go to the browser in wh
 
 In the search bar at the top of the GCP Console page, type "subnetworks".  Select the "VPC Networks" service from the drop-down.
 
-![AWS Console Service Search](./images/console-search-vpc.png "GCP Console Service Search")
+![GCP Console Service Search](./images/console-search-vpc.png "GCP Console Service Search")
 <br /><br />
 
 On the VPC dashboard page, scroll down to find the new subnets.  You will see two subnets listed.  One has the name "lab-public" the other has the name "lab-private"

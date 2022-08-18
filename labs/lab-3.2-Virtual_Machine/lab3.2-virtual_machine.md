@@ -121,7 +121,7 @@ Exit the SSH session on the bastion host virtual machine.
 
 Let's suppose your organization also wants to support accessing the bastion host via a VPN.  To enable this access, we will modify the firewall rules to allow TCP traffic on port 1194.
 
-Add the following to the security group in the `bastion.tf` file.  To see where to add the code, go to the Terraform documentation page for "aws_security_group". (Or you can look at the code in the solution folder of this lab.)
+Add the following to the security group in the `bastion.tf` file.  To see where to add the code, go to the Terraform documentation page for "google_compute_firewall". (Or you can look at the code in the solution folder of this lab.)
 
 ```
 resource "google_compute_firewall" "vpn" {
