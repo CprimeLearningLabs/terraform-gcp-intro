@@ -2,6 +2,11 @@ locals {
   region         = var.region
   project        = "tf-project-000000"
   instance_image = "projects/rocky-linux-cloud/global/images/rocky-linux-8-v20220719"
+  size_spec = {
+    low = 1,
+    medium = 2,
+    high = 3
+  }
   cluster_size   = try(coalesce(var.node_count, lookup(local.size_spec,var.load_level)), 1)
 }
 
@@ -9,7 +14,7 @@ terraform {
   required_providers {
     random = {
       source  = "hashicorp/random"
-      version = "~> 2.3.0"
+      version = "~> 3.1.0"
     }
     google = {
       source = "hashicorp/google"

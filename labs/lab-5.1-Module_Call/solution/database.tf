@@ -1,17 +1,16 @@
-resource "google_sql_database_instance" "lab-database" {
-  name             = var.db_name
-  region           = "us-central1"
+module "sql-db_postgresql" {
+  source           = "GoogleCloudPlatform/sql-db/google//modules/postgresql"
+  version          = "12.0.0"
+  name             = "module-database"
+  project_id       = local.project
+  zone             = "us-central1-a"
   database_version = "POSTGRES_14"
-  settings {
-    tier = "db-f1-micro"
-  }
-  deletion_protection  = "false"
-}
-
-resource "google_sql_user" "lab-db" {
-  name     = "lab-db"
-  instance = google_sql_database_instance.lab-database.name
-  password = random_password.dbpassword.result
+  additional_users = [
+    {
+      name         = "lab-db"
+      password     = random_password.dbpassword.result
+    },
+  ]
 }
 
 resource "random_password" "dbpassword" {

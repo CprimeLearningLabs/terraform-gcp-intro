@@ -1,43 +1,30 @@
 terraform {
   required_providers {
-    aws = {
-      source = "hashicorp/aws"
-      version = "~> 3.0"
+    google = {
+      source = "hashicorp/google"
+      version = "4.31.0"
     }
   }
   required_version = "> 1.0.0"
 }
 
-resource "aws_lb" "lab" {
-  name               = "terraform-labs-load-balancer"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = var.security_groups
-  subnets            = var.subnets
-
-  tags = {
-    Name = "Terraform-Labs-Load-Balancer"
-  }
+resource "google_compute_forwarding_rule" "lab-http" {
+  name       = "website-forwarding-rule"
+  target     = "${google_compute_target_pool.lab-http.self_link}"
+  port_range = var.port
 }
 
-resource "aws_lb_target_group" "lab" {
-  name     = "terraform-labs-lb-target-group"
-  vpc_id   = var.vpc_id
-  port     = 80
-  protocol = "HTTP"
-
-  tags = {
-    Name = "Terraform-Labs-Load-Balancer"
-  }
+resource "google_compute_target_pool" "lab-http" {
+  name         = "instance-pool"
+  instances    = var.backend_instances
+  health_checks = [
+    google_compute_http_health_check.lab-cluster.name,
+  ]
 }
 
-resource "aws_lb_listener" "lab" {
-  load_balancer_arn = aws_lb.lab.id
-  port              = "80"
-  protocol          = "HTTP"
-
-  default_action {
-    target_group_arn = aws_lb_target_group.lab.id
-    type             = "forward"
-  }
+resource "google_compute_http_health_check" "lab-cluster" {
+  name               = "lab-cluster"
+  request_path       = "/"
+  check_interval_sec = 5
+  timeout_sec        = 2
 }

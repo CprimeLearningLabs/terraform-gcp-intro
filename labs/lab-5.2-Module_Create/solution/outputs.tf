@@ -3,9 +3,9 @@ output "bastion-public-ip" {
 }
 
 output "db-server-endpoint" {
-  value = google_sql_database_instance.lab-database.ip_address[0].ip_address
+  value = module.sql-db_postgresql.public_ip_address
 }
 
 output "network_load_balancer_ip" {
-    value = "${google_compute_forwarding_rule.lab-http.ip_address}"
+    value = module.load-balancer.public_ip
 }

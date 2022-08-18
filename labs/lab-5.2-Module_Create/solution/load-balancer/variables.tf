@@ -1,12 +1,7 @@
-variable "vpc_id" {
+variable "port" {
   type = string
 }
 
-variable "subnets" {
+variable "backend_instances" {
   type = list(string)
-}
-
-variable "security_groups" {
-  type = list(string)
-  default = []
 }

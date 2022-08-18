@@ -27,17 +27,14 @@ First, a module should include its provider requirements.  So add the following 
 ```
 terraform {
   required_providers {
-    aws = {
-      source = "hashicorp/aws"
-      version = "~> 3.0"
+    google = {
+      source = "hashicorp/google"
+      version = "4.31.0"
     }
   }
   required_version = "> 1.0.0"
 }
 ```
-
-Next, cut the security group (resource `"aws_security_group" "lab-alb"`) from the `load-balancer/main.tf` file.
-> Whether or not to create the security group within the module is a design decision. To avoid some complications from refactoring our code, we will leave the security group creation outside of the module code.
 
 #### Load balancer variables
 
@@ -46,9 +43,8 @@ Within the `load-balancer` directory, create a file called `variables.tf`.
 Go through the `load-balancer/main.tf` file and look for what arguments will need values passed into the module.  (The load balancer module cannot access the parent resources directly.)  These are candidates for the input variables for the load balancer module.
 
 In the `load-balancer/variables.tf` file, add variables for the following:
-  * VPC ID
-  * Subnet IDs
-  * Security group
+  * Port (string)
+  * Backend Targets (list)
 
 Try to write the variables.tf code on your own initially. Compare your code to the solution below (or in the load-balancer/variables.tf file in the solution folder).
 
@@ -57,18 +53,14 @@ Try to write the variables.tf code on your own initially. Compare your code to t
  _<summary>Click to see solution for load balancer module variables</summary>_
 
 ```
-variable "vpc_id" {
+variable "port" {
   type = string
 }
 
-variable "subnets" {
+variable "backend_instances" {
   type = list(string)
 }
 
-variable "security_groups" {
-  type = list(string)
-  default = []
-}
 ```
 </details>
 
@@ -81,8 +73,7 @@ Within the `load-balancer` directory, create a file called `outputs.tf`.
 Go through the root module's files to see where load balancer attributes are referenced.  These are candidates for output values from the load balancer module.
 
 In the `load-balancer/outputs.tf` file, add outputs for the following:
-  * load balancer target group ARN
-  * load balancer public DNS name
+  * load balancer public IP
 
 Try to write this on your own initially.  Compare your code to the solution below (or in the load-balancer/outputs.tf file in the solution folder).
 
@@ -91,12 +82,8 @@ Try to write this on your own initially.  Compare your code to the solution belo
  _<summary>Click to see solution for load balancer module outputs</summary>_
 
 ```
-output "target_group_arn" {
-  value = aws_lb_target_group.lab.arn
-}
-
-output "dns_name" {
-  value = aws_lb.lab.dns_name
+output "public_ip" {
+  value = google_compute_forwarding_rule.lab-http.ip_address
 }
 ```
 </details>
@@ -107,11 +94,11 @@ At this point, you now have a nested module with inputs and outputs defined.  Ne
 
 Open the file `lb.tf` in the root module (parent directory).  
 
-Delete the two resources `"aws_lb" "lab"` and `"aws_lb_target_group" "lab"` since those are now in the load-balancer's main.tf file.
+Delete the all the resources since they are now in the load-balancer's main.tf file.
 
 Add a call to the load balancer module, setting argument values corresponding to the input variables for the load balancer.  The module source should be "./load-balancer".
 
-Try writing this on your own first. Compare your code to the solution below (or in the vm-cluster.tf file in the solution folder).
+Try writing this on your own first. Compare your code to the solution below (or in the database.tf file in the solution folder).
 
 <details>
 
@@ -121,17 +108,15 @@ Try writing this on your own first. Compare your code to the solution below (or 
 module "load-balancer" {
   source = "./load-balancer"
 
-  vpc_id          = aws_vpc.lab.id
-  subnets         = [aws_subnet.lab-public-1.id, aws_subnet.lab-public-2.id]
-  security_groups = [aws_security_group.lab-alb.id]
+  port              = "80"
+  backend_instances = google_compute_instance.cluster.*.self_link
 }
 ```
 </details>
 
 In the root module, you now need to use the module outputs to replace references to the load balancer attributes.  Be sure to use the "module" prefix in the references.
 
-* Update the reference for `target_group_arn` in "vm-cluster.tf"
-* Update the value for `dns_name` in "outputs.tf" in the root module.
+* Update the value for `network_load_balancer_ip` in "outputs.tf" in the root module.
 
 ### Execute terraform commands
 
