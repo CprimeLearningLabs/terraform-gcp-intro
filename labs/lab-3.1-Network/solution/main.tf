@@ -20,6 +20,6 @@ provider "random" {
 }
 
 provider "google" {
-  project     = "tf-project-000000"
+  project     = "tf-project-XX"
   region      = "us-central1"
 }

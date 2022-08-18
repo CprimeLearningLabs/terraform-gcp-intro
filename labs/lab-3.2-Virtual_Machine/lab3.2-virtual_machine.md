@@ -89,7 +89,7 @@ To connect to the virtual machine, you need its public IP.  You can get this in 
 
 1. Run `gcloud compute ssh`
 
-    a. Run `gcloud compute ssh --zone "us-central1-a" "bastion"  --project "tf-project-000000"` replace "tf-project-000000" with your project name.
+    a. Run `gcloud compute ssh --zone "us-central1-a" "bastion"  --project "tf-project-XX"` replace "tf-project-XX" with your project name.
 
     b. Notice that this also generates a SSH key pair adding it to the running VM.
 

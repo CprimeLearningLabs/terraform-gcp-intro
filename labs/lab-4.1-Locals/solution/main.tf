@@ -1,6 +1,6 @@
 locals {
   region         = "us-central1"
-  project        = "tf-project-000000"
+  project        = "tf-project-XX"
   instance_image = "projects/rocky-linux-cloud/global/images/rocky-linux-8-v20220719"
 }
 

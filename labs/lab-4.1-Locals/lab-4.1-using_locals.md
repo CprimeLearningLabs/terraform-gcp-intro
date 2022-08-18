@@ -17,16 +17,16 @@ Add a locals block at the bottom of the file:
 ```
 locals {
   region         = "us-central1"
-  project        = "tf-project-000000"
+  project        = "tf-project-XX"
   instance_image = "projects/rocky-linux-cloud/global/images/rocky-linux-8-v20220719"
 }
 ```
 
 Use the locals to replace the literal values in various resources:
-* Replace the region attribute value in the GCP provider block in "main.tf" with <code>local.region</code>
+* Replace the region attribute value in the google provider block in "main.tf" with <code>local.region</code>
 * Replace the region attribute values in the networking blocks in "network.tf" with <code>local.region</code>. 4 times in that file.
-* Replace the value of the project tag in the GCP provider block in "main.tf" with <code>local.project</code>
-* Replace the image attribute value in the "bastion" resource in "bastion.tf" with <code>local.instance_image</code>
+* Replace the value of the project tag in the google provider block in "main.tf" with <code>local.project</code>
+* Replace the image attribute value in the bastion resource in "bastion.tf" with <code>local.instance_image</code>
 
 Compare your changes to the code in the solution folder.
 
