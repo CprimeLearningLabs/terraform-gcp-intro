@@ -1,12 +1,25 @@
+locals {
+  network_allow = {
+    "icmp" = {
+      protocol = "icmp"
+      ports    = []
+    }
+    "tcp" = {
+      protocol = "tcp"
+      ports    = ["22", "80", "443", "8000-8999"]
+    }
+  }
+}
+
 resource "google_compute_firewall" "lab" {
   name          = "lab"
   network       = google_compute_network.lab.name
-  allow {
-    protocol    = "icmp"
-  }
-  allow {
-    protocol    = "tcp"
-    ports       = ["22", "80", "443", "8000-8999"]
+  dynamic "allow" {
+    for_each = local.network_allow
+    content {
+      protocol = allow.value.protocol
+      ports    = allow.value.ports
+    }
   }
   source_ranges = ["0.0.0.0/0"]
 }

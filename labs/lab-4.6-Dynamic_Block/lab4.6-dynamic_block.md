@@ -1,7 +1,7 @@
 # Dynamic Blocks
 
 Lab Objective:
-- Implement a dynamic block to handle multiple security group rules
+- Implement a dynamic block to handle multiple allow rules in the network firewall
 
 ## Preparation
 
@@ -9,18 +9,17 @@ If you did not complete lab 4.5, you can simply copy the solution code from that
 
 ## Lab
 
-Open `bastion.tf` for edit.
+Open `network.tf` for edit.
 
-Notice that within the security group resource, there are multiple ingress rule sub-blocks.  We will replace the multiple sub-blocks by a single dynamic block.
+Notice that within the "google_compute_firewall.lab", there are multiple allow rule sub-blocks. We will replace those allow sub-blocks with a single dynamic block.
 
-A dynamic block uses the for_each construct, which you now know requires a map of values by which to populate values for each iteration.  Since there are two security group rules, the map will have two keys.  What might you use as the map key for the different security rules?
+A dynamic block uses the for_each construct, which you now know requires a map of values by which to populate values for each iteration.  Since there are two items, the map will have two keys.  What might you use as the map key for the different allow rules?
 
-Create a locals block in `bastion.tf`, add a new map with two keys (use the ingress rule description as the keys), and a sub-map for each key to specify the following values:
-* port
+Create a locals block in `network.tf`, add a new map with two keys, and a sub-map for each key to specify the following values:
 *	protocol
-*	cidr blocks
+*	ports
 
-Try your hand at writing the map before looking at the solution below (or in bastion.tf in the solution directory).
+Try your hand at writing the map before looking at the solution below (or in network.tf in the solution directory).
 
 <details>
 
@@ -28,37 +27,32 @@ Try your hand at writing the map before looking at the solution below (or in bas
 
 ```
 locals {
-  bastion_ingress = {
-    "SSH Access" = {
-      port     = 22
-      protocol = "tcp"
-      cidrs    = ["0.0.0.0/0"]
+  network_allow = {
+    "icmp" = {
+      protocol = "icmp"
+      ports    = []
     }
-    "VPN Access" = {
-      port     = 1194
+    "tcp" = {
       protocol = "tcp"
-      cidrs    = ["10.1.8.0/24"]
+      ports    = ["22", "80", "443", "8000-8999"]
     }
   }
 }
 ```
 </details>
 
-Now replace the security group ingress rules with a dynamic block.  Try your hand at it, then compare your code to the solution below (or in bastion.tf in the solution folder).
+Now replace the network firewall allow rules with a dynamic block.  Try your hand at it, then compare your code to the solution below (or in network.tf in the solution folder).
 
 <details>
 
  _<summary>Click to see solution for dynamic block</summary>_
 
 ```
-  dynamic "ingress" {
-    for_each = local.bastion_ingress
+  dynamic "allow" {
+    for_each = local.network_allow
     content {
-      description = ingress.key
-      from_port   = ingress.value.port
-      to_port     = ingress.value.port
-      protocol    = ingress.value.protocol
-      cidr_blocks = ingress.value.cidrs
+      protocol = allow.value.protocol
+      ports    = allow.value.ports
     }
   }
 ```
