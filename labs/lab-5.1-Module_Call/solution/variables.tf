@@ -23,13 +23,9 @@ variable "db_name" {
   default = "lab-database-instance"
 }
 
-variable "tags" {
-  type = map(string)
-  default = {}
-}
-
 variable "node_count" {
-  type = number
+  description = "Number of Cluster web hosts"
+  type = string
   default = null
 }
 

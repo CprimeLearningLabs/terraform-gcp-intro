@@ -9,72 +9,9 @@ If you did not complete lab 4.6, you can simply copy the solution code from that
 
 ## Lab
 
-### Tag Merge
-
-Open the file `variables.tf`.
-
-Add a new variable to accept additional tags to set on our resources.  What should be the type for the tags variable?  (Hint: take a look at the existing tags argument in the various resources.)  Declare an empty map as the default value for the variable.
-
-<details>
-
- _<summary>Click to see solution for tags variable</summary>_
-
-```
-variable "tags" {
-  type = map(string)
-  default = {}
-}
-```
-</details>
-
-Open the file `main.tf`.
-
-Modify the tags argument in the GCP provider block to merge the tags input variable and the existing tag map.  What function would you use?  Try your hand at writing the solution before checking the solution below.  You can use terraform validate to check the syntax correctness of your solution.
-
-<details>
-
- _<summary>Click to see solution for merging tags variable and local value</summary>_
-
-```
-    tags = merge(var.tags,{
-      Name = "Terraform-Labs"
-      Environment = local.environment
-    })
-```
-</details>
-
-Run terraform validate:
-```
-terraform validate
-```
-
-Run terraform plan and confirm that nothing needs to be updated.  Why is that?
-```
-terraform plan
-```
-
-Now open the `terraform.tfvars` file.  Add a value for tags variable:
-```
-tags = {
-  Owner = "Development"
-}
-```
-
-Run terraform plan and see that the tags for numerous resources will be updated:
-```
-terraform plan
-```
-
-![Terraform Plan - Add value for Owner and merge tags](./images/tf-plan-merge.png "Terraform Plan - Add value for Owner and merge tags")
-
-Run terraform apply:
-```
-terraform apply
-```
-
 ### Cluster Size Calculation
 
-Now let’s try some more functions.
+Now let’s try to create a function to determin the cluster size s.
 
 Open the file `main.tf`.
 
@@ -100,7 +37,8 @@ Add two more variables to `variables.tf`:
 
 ```
 variable "node_count" {
-  type = number
+  description = "Number of Cluster web hosts"
+  type = string
   default = null
 }
 
