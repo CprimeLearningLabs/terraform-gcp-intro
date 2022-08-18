@@ -2,6 +2,7 @@ locals {
   region         = var.region
   project        = "tf-project-000000"
   instance_image = "projects/rocky-linux-cloud/global/images/rocky-linux-8-v20220719"
+  cluster_size   = "2"
 }
 
 terraform {

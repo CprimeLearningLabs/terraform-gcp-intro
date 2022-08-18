@@ -11,6 +11,12 @@ variable "bastion_vm_type" {
   }
 }
 
+variable "cluster_vm_type" {
+  description = "Instance type for the cluster VMs"
+  type = string
+  default = "f1-micro"
+}
+
 variable "db_name" {
   description = "Name of database to be created."
   type = string

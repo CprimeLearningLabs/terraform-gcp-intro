@@ -6,6 +6,6 @@ output "db-server-endpoint" {
   value = google_sql_database_instance.lab-database.ip_address[0].ip_address
 }
 
-output "load-balancer-dns" {
-  value = module.load-balancer.dns_name
+output "network_load_balancer_ip" {
+    value = "${google_compute_forwarding_rule.lab-http.ip_address}"
 }

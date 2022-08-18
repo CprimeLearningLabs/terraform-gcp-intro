@@ -63,6 +63,7 @@ Run terraform apply.
 terraform apply
 ```
 
+---
 
 ### Using count
 
@@ -70,95 +71,108 @@ To show the use of count, we will create a small cluster of virtual machines beh
 
 Create a new file called `lb.tf`
 
-Copy the contents from the lb.tf file in the solution directory into your new file.  Notice that it declares three new resources:
+1. Add a forwarding rule, this is the load balancer frontend.
 
-* A security group to enable HTTP traffic through the load balancer
-* A load balancer
-* A target group to forward HTTP traffic to the cluster virtual machines
+```
+resource "google_compute_forwarding_rule" "lab-http" {
+  name       = "website-forwarding-rule"
+  target     = "${google_compute_target_pool.lab-http.self_link}"
+  port_range = "80"
+}
+```
 
-Do not make any changes.  You can examine the file, but leave it as is.  We will be coming back to revisit this file in a subsequent lab.
+2. Add a target pool, this is the load balancer backend.
+
+```
+resource "google_compute_target_pool" "lab-http" {
+  name         = "instance-pool"
+  instances    = google_compute_instance.cluster.*.self_link
+  health_checks = [
+    google_compute_http_health_check.lab-cluster.name,
+  ]
+}
+```
+
+3. Lastly, add a health check to that the target pool will use.
+
+```
+resource "google_compute_http_health_check" "lab-cluster" {
+  name               = "lab-cluster"
+  request_path       = "/"
+  check_interval_sec = 5
+  timeout_sec        = 2
+}
+```
 
 Open `outputs.tf`
 
 Add a new output so we can easily get the load balancer DNS name:
 ```
-output "load-balancer-dns" {
-  value = aws_lb.lab.dns_name
+output "network_load_balancer_ip" {
+    value = "${google_compute_forwarding_rule.lab-http.ip_address}"
 }
 ```
 
 Create a new file called `vm-cluster.tf` and open it for edit.
 
-Add a locals block to create a list of the ids of the private subnets.
-```
-locals {
-  private_subnet_ids = [aws_subnet.lab-private-1.id, aws_subnet.lab-private-2.id]
-}
-```
-> Extra Credit: Can you find a data source we could use in place of the local -- i.e., a data source that would read the subnet ids for subnets with the tag SubnetTier = "Application"?
+Next, we will create two resources.  Notice that we will be using the count meta-argument in the "google_compute_instance" resource to create multiple nodes.  The count will be based on a new local (which we will add later) to set the size of the VM cluster.
 
-Next, we will create three resources.  Notice that we will be using the count meta-argument in two of the resources to create multiple instances of the resources.  The count will be based on a new local (which we will add later) to set the size of the VM cluster.
-
-1. Add a security group to enable SSH access from the bastion host and HTTP traffic from the load balancer.
+1. Add a firewall for HTTP traffic from the load balancer.
 ```
-resource "aws_security_group" "lab-cluster" {
-  name    = "terraform-labs-cluster"
-  vpc_id  = aws_vpc.lab.id
-
-  ingress {
-    description = "SSH Access"
-    from_port   = 22
-    to_port     = 22
+resource "google_compute_firewall" "http" {
+  name          = "allow-http"
+  allow {
+    ports       = ["80"]
     protocol    = "tcp"
-    cidr_blocks = ["${aws_instance.lab-bastion.private_ip}/32"]
   }
-  ingress {
-    description = "HTTP Access"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    security_groups = [aws_security_group.lab-alb.id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "Terraform-Labs-Cluster"
-  }
+  direction     = "INGRESS"
+  network       = "default"
+  priority      = 1000
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["http"]
 }
 ```
 
-2. Add the virtual machines.  We use count here to create multiple virtual machines.  Note that the VMs are identical other than references to `count.index`.
+2. Add the virtual machines.  We use count here to create multiple virtual machines.  Note that these instance will install and start a web server that returns some basic node information.
 ```
-resource "aws_instance" "lab-cluster" {
-  count = local.cluster_size
-
-  ami           = local.instance_ami
-  instance_type = "t3.micro"
-  subnet_id     = local.private_subnet_ids[count.index % length(local.private_subnet_ids)]
-
-  vpc_security_group_ids = [aws_security_group.lab-cluster.id]
-  key_name               = var.vm_keypair_name
-
-  tags = {
-    Name = "Terraform-Labs-Cluster-VM-${count.index}"
+resource "google_compute_instance" "cluster" {
+  count            = local.cluster_size
+  name             = "cluster-${count.index}"
+  machine_type     = var.cluster_vm_type
+  zone             = "us-central1-a"
+  tags             = ["http","ssh"]
+  metadata = {
+    enable-oslogin = "TRUE"
   }
-}
-```
-
-3. Attach the virtual machines to the target group of the load balancer.  We use count to create a separate attachment for each virtual machine.
-```
-resource "aws_lb_target_group_attachment" "lab-cluster" {
-  count = local.cluster_size
-
-  target_group_arn = aws_lb_target_group.lab.arn
-  target_id        = aws_instance.lab-cluster[count.index].id
-  port             = 80
+  boot_disk {
+    initialize_params {
+      image        = local.instance_image
+    }
+  }
+  network_interface {
+    network        = "lab"
+    subnetwork     = "lab-private"
+  }
+  metadata_startup_script = <<SCRIPT
+fallocate -l 1G /swapfile
+chmod 0600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+dnf install -y nginx
+sleep 5
+systemctl enable nginx
+systemctl start nginx
+NAME=$(curl -H "Metadata-Flavor: Google" "http://metadata.google.internal/computeMetadata/v1/instance/hostname")
+IP=$(curl -H "Metadata-Flavor: Google" "http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/ip")
+METADATA=$(curl -f -H "Metadata-Flavor: Google" "http://metadata.google.internal/computeMetadata/v1/instance/attributes/?recursive=True" | jq 'del(.["startup-script"])')
+cat <<EOF > /usr/share/nginx/html/index.html
+<pre>
+  Name: $NAME
+  IP: $IP
+  Metadata: $METADATA
+</pre>
+EOF
+SCRIPT
 }
 ```
 
@@ -166,7 +180,19 @@ Open `main.tf` for edit.
 
 In the locals block, add a new local value for cluster_size, which be the number of virtual machines to create in the cluster.  Set it to 2.
 ```
-  cluster_size = 2
+  cluster_size = "2"
+```
+
+Open `variables.tf`
+
+Add a variable block for "cluster_vm_type".  It can be set with a default value so we do not need to set it elsewhere.
+
+```
+variable "cluster_vm_type" {
+  description = "Instance type for the cluster VMs"
+  type = string
+  default = "f1-micro"
+}
 ```
 
 Okay, that's a lot of edits.  Be sure to run terraform validate to make sure you got everything.
@@ -179,12 +205,14 @@ Run terraform plan to verify what will be created.  Scroll through the plan.  Do
 terraform plan
 ```
 
-![Terraform Plan - Count](./images/tf-plan-count.png "Terraform Plan - count")
-
 Run terraform apply:
 ```
 terraform apply
 ```
+
+Now some fun parts.  Notice the output for the "network_load_balancer_ip".  Give it a few minutes to provision the new web instances. Then see if you can connect to that ip address of the load balancer.  When the connection succeeds reload the page a few times.  Notice how the content changes.
+
+---   
 
 ### Using count for conditional creation
 
