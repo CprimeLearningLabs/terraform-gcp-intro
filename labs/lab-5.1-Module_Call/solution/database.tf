@@ -1,14 +1,15 @@
 module "sql-db_postgresql" {
-  source           = "GoogleCloudPlatform/sql-db/google//modules/postgresql"
-  version          = "12.0.0"
-  name             = "module-database"
-  project_id       = local.project
-  zone             = "us-central1-a"
-  database_version = "POSTGRES_14"
-  additional_users = [
+  source              = "GoogleCloudPlatform/sql-db/google//modules/postgresql"
+  version             = "12.0.0"
+  name                = "lab-database"
+  deletion_protection = false
+  project_id          = local.project
+  zone                = "us-central1-a"
+  database_version    = "POSTGRES_14"
+  additional_users    = [
     {
-      name         = "lab-db"
-      password     = random_password.dbpassword.result
+      name            = "lab-db"
+      password        = random_password.dbpassword.result
     },
   ]
 }

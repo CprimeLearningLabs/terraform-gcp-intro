@@ -22,6 +22,7 @@ Open `database.tf`
 Using the module documentation as a guide, replace the "google_sql_database_instance" and "google_sql_user" sections with the "sql-db_postgresql" module.:
 * the database version is "POSTGRES_14"
 * the name to "module-database"
+* turn off delete protection
 * the zone to "us-central1-a"
 * create a "lab-db" use with the generated password from "random_password.dbpassword"
 
@@ -35,16 +36,17 @@ Compare your code to the solution below (or in the database.tf file in the solut
 
 ```
 module "sql-db_postgresql" {
-  source           = "GoogleCloudPlatform/sql-db/google//modules/postgresql"
-  version          = "12.0.0"
-  name             = "lab-database"
-  project_id       = local.project
-  zone             = "us-central1-a"
-  database_version = "POSTGRES_14"
-  additional_users = [
+  source              = "GoogleCloudPlatform/sql-db/google//modules/postgresql"
+  version             = "12.0.0"
+  name                = "lab-database"
+  deletion_protection = false
+  project_id          = local.project
+  zone                = "us-central1-a"
+  database_version    = "POSTGRES_14"
+  additional_users    = [
     {
-      name         = "lab-db"
-      password     = random_password.dbpassword.result
+      name            = "lab-db"
+      password        = random_password.dbpassword.result
     },
   ]
 }
@@ -76,3 +78,5 @@ Run terraform apply:
 ```
 terraform apply
 ```
+
+This may take a while.  Depending on the details you may run into some issues with it timing out.  If it does try the "terraform apply" again, if future runs produce errors regarding the database name already existing, try changing the DB name. For instance append a number to the end of the name (lab-database01).  A better solution needs to be resolved as this seems to be an issue with Cloud SQL and this module.

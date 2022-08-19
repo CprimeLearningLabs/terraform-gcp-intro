@@ -1,7 +1,11 @@
-# Steps to setup environment
+# Steps on local environments
+
+### Option One (Local environments)
 
 - Install Python
   - Open PowerShell ISE as Administrator (The instructor provide a password)
+
+- Install Google Cloud SDK (Already installed on provided VM)
 
 - Login to Google Cloud
 
@@ -19,23 +23,29 @@
 
 –	Login : `gcloud auth login`
 
+- Verify that you are connected
+  - `gcloud projects list`
 
+
+### Option #2 use Cloud Shell (Preferred in the labs)
+
+- Login to Google Cloud
+
+–	Switch to “tf-project-XX”
+
+- Start the Cloud shell
+
+- Verify that you are connected
+  - `gcloud projects list`
 
 ---
 
-  –	Verify login works with: `gcloud projects list`
+## Finish setting up your environment
 
 –	Select your project : `gcloud config set project PROJECT_ID`
 
 –	Create the state bucket `gsutil mb -p tf-project-XX gs://tf-state-XX``
   - example `gsutil mb -p tf-project-42 gs://tf-state-42`
 
-–	Add the "tf-shell" Service Account as a new principle the new Cloud Storage Bucket “Role/Storage Object Admin”
-
-–	in IAM add the Role “Compute Admin” to the "tf-shell" principal
-
-
----
-
-- enable "Compute Engine API" for your project
+- enable "Compute Engine API" for your project (If not already completed)
   - https://console.cloud.google.com/apis/library/compute.googleapis.com?project=tf-project-XX
