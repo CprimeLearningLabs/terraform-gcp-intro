@@ -10,44 +10,37 @@ In a browser, go to https://console.google.com
 
 Enter the account number and login credentials.  From the console, you will have read access to view the infrastructure you subsequently provision in the labs using Terraform.
 
-## Workstation Virtual Machine
+## Select your project
 
-For the labs in this class you will using a virtual machine that has been provisioned for you in GCP.  You can choose between a Linux workstation or a Windows workstation.  Follow the instruction in the appropriate sub-section below.
+Each account has a corresponding project folder to work in within GCP.  You can select the project near the top of the GCP console.  You should find your project in the orginizations `tf-class` folder.  The project name will be of the format `tf-project-XX` where 'XX' is replaced by your student ID number provider by the instructor.
 
-### Linux Workstation for Labs
+## Enable the APIs on the project
 
-Your instructor will provide the following access information to you:
-* Machine IP address or hostname
-* SSH key
+We will need to have some API enabled on the project.  In the Google Cloud search box type 'API' and select 'API & Services'.  Near the top of this page select '+ ENABLE APIS AND SERVICES'.  From this page enable the following APIs (Search for them):
 
-Save the SSH key in a temporary location on your local machine.  Use a terminal window or Putty to use SSH to access the remote workstation.
+- Compute Engine API
 
-#### Terminal Window Access to Remote Linux Workstation
+## Cloud shell
 
-If your local machine is Linux-based, you can use a terminal window to connect to the remote Linux machine.  Execute SSH from your local machine, substituting the appropriate values for <machine-ip> and <path-to-ssh-key>. (If you get a message about authenticity of the host and asking if you want to continue, type 'yes'.)
+At the top of the main portal page, find the icon activate the Cloud Shell.  The first time accessing the new terminal it would be helpful to create a working directory for your terraform project.  This directory will be used for each of the following labs.
 
+```shell
+mkdir -p ~/terraform
+cd ~/terraform
 ```
-ssh ubuntu@<machine-ip> -i <path-to-ssh-key>
-```
 
-After you connect, you will be in the home directory for the ubuntu user.  You can do the labs there (or you can create a separate folder if you want).
+You may find it handy to select "Open in new window" to move the Cloud shell to an additional browser tab.  You also can optionally open the Cloud Shell editor by selecting "Open Editor".  Once the Cloud Shell Editor is open select "Open Folder.." to select your newly created "terraform" project folder.
 
-#### Putty Access to Remote Linux Workstation
+### Selecting project on the Shell
 
-If your local machine is Windows-based, you can use Putty to access the remote Linux machine.  If you are new to Putty, follow the instructions in the linked document below. **Use the host and SSH key provided by your instructor in place of the host and key referenced in the document.**
+When running commands in GCP it is important that you are using the correct project.  You will notice the project name as part of your shell prompt.  You can set the current project for the Cloud Shell with the following command.
 
-https://cprime.securevdr.com/share/view/se9a65f4b06b64a578a6f0efd63d110bf
+`gcloud config set project PROJECT_ID`
 
-After you connect, you will be in the home directory for the ubuntu user.  You can do the labs there (or you can create a separate folder if you want).
+### Create an Cloud Storage bucket for terraform remote state
 
-### Windows Workstation for Labs
+In a later lab we will need a Cloud Storage bucket to store terraform remote state.  If you have not yet let us create that bucket now.  Within the cloud shell, first make sure you are in the correct project, then run this command replacing the two instances of 'XX' with your student ID number: `gsutil mb -p tf-project-XX gs://tf-state-XX`. For instance if your student ID number is '42' the command would look like: `gsutil mb -p tf-project-42 gs://tf-state-42`.  Later in the exercise you will use "tf-state-XX" again replacing 'XX' as your remote state bucket name.
 
-Your instructor will provide the following access information to you:
-* Machine IP address or hostname
-* User credentials (username and password)
+You are now set to proceed with the labs for the class.
 
-Using Windows Remote Desktop from your local machine, enter the provided information to connect to the Windows machine.  If you are new to Windows Remote Desktop, follow the instructions in the linked document below.  **Use the host and credentials provided by your instructor in place of the host and credentials referenced in the document.**
-
-https://cprime.securevdr.com/share/view/se9a65f4b06b64a578a6f0efd63d110bf
-
-After you connect, open a command terminal window.  In the command window, you will be in the home directory for the user.  Although you could do the labs there, it would be cleaner to create a separate folder (or subdirectory) for the lab files.
+:bangbang: NOTE: If the cloud shell times out (and it likely will between labs), then you will get a prompt to reconnect. After reconnecting, be sure to change to the "~/terraform" directory again.

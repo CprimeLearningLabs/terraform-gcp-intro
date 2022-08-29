@@ -6,6 +6,8 @@ module "sql-db_postgresql" {
   project_id          = local.project
   zone                = "us-central1-a"
   database_version    = "POSTGRES_14"
+  create_timeout      = "30m"
+  delete_timeout      = "30m"
   additional_users    = [
     {
       name            = "lab-db"

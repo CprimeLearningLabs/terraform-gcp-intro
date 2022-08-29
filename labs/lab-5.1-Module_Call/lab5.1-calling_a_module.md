@@ -23,6 +23,7 @@ Using the module documentation as a guide, replace the "google_sql_database_inst
 * the database version is "POSTGRES_14"
 * the name to "module-database"
 * turn off delete protection
+* set the create and delete timeouts to "30m"
 * the zone to "us-central1-a"
 * create a "lab-db" use with the generated password from "random_password.dbpassword"
 
@@ -43,6 +44,8 @@ module "sql-db_postgresql" {
   project_id          = local.project
   zone                = "us-central1-a"
   database_version    = "POSTGRES_14"
+  create_timeout      = "20m"
+  delete_timeout      = "30m"
   additional_users    = [
     {
       name            = "lab-db"
